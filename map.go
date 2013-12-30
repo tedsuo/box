@@ -1,81 +1,88 @@
-package f
+package box
+
+import "reflect"
 
 // INTERFACE
 
 type Map interface {
-	Getter
-	Setter
-	Deleter
-	IsEmpty() bool
-	Count() int
-	Has(key interface{}) bool
+	Collection
 	IsNil(key interface{}) bool
 	NotNil(key interface{}) bool
 }
 
-func NewEmptyMap() Map {
-	return &ConcreteMap{}
-}
+// INITIALIZATION
 
-func NewMap(data interface{}) Map {
-	switch data := data.(type) {
+func NewMap(input ...interface{}) (mapp Map) {
+	if len(input) == 0 {
+		return newEmptyMap()
+	}
+
+	switch data := input[0].(type) {
 	case Map:
-		return data
-	case map[string]string:
-		stringMap := NewEmptyMap()
-		for key, val := range data {
-			stringMap.Set(key, val)
-		}
-		return stringMap
+		mapp = data
 	case map[interface{}]interface{}:
-		mapp := ConcreteMap(data)
-		return &mapp
+		newMap := aMap(data)
+		mapp = &newMap
 	default:
-		return &ConcreteMap{}
+		mapp = newMapFromValue(reflect.ValueOf(data))
 	}
+
+	return
 }
 
-func Merge(collection, otherCollection Map) interface{} {
-	mergedMap := NewEmptyMap()
+func newEmptyMap() Map {
+	return &aMap{}
+}
 
-	iterator := func(key, value interface{}) {
-		mergedMap.Set(key, value)
+func newMapFromValue(inputVal reflect.Value) (mapp Map) {
+	switch inputVal.Kind() {
+	case reflect.Struct:
+		mapp = newMapFromStructValue(inputVal)
 	}
+	return
+}
 
-	Each(collection, iterator)
-	Each(otherCollection, iterator)
+func newMapFromStructValue(inputVal reflect.Value) (mapp Map) {
+	mapp = newEmptyMap()
+	inputType := inputVal.Type()
+	FieldCount := inputVal.NumField()
 
-	return mergedMap
+	for i := 0; i < FieldCount; i++ {
+		key := inputType.Field(i).Name
+		val := inputVal.Field(i).Interface()
+		mapp.Set(key, val)
+	}
+	return
 }
 
 // IMPLEMENTATION
 
-type ConcreteMap map[interface{}]interface{}
+type aMap map[interface{}]interface{}
 
-func (data *ConcreteMap) IsEmpty() bool {
+func (data *aMap) IsEmpty() bool {
 	return data.Count() == 0
 }
 
-func (data *ConcreteMap) Count() int {
+func (data *aMap) Count() int {
 	return len(*data)
 }
 
-func (data *ConcreteMap) Has(key interface{}) bool {
+func (data *aMap) Has(key interface{}) bool {
 	_, ok := (*data)[key]
 	return ok
 }
 
-func (data *ConcreteMap) IsNil(key interface{}) bool {
+func (data *aMap) IsNil(key interface{}) bool {
 	maybe, ok := (*data)[key]
 	return ok && maybe == nil
 }
 
-func (data *ConcreteMap) NotNil(key interface{}) bool {
+func (data *aMap) NotNil(key interface{}) bool {
 	maybe, ok := (*data)[key]
 	return ok && maybe != nil
 }
 
-func (data *ConcreteMap) Keys() (keys []interface{}) {
+func (data *aMap) Keys() (keys []interface{}) {
 	keys = make([]interface{}, 0, data.Count())
 
 	for key := range *data {
@@ -85,14 +92,14 @@ func (data *ConcreteMap) Keys() (keys []interface{}) {
 	return
 }
 
-func (data *ConcreteMap) Get(key interface{}) interface{} {
+func (data *aMap) Get(key interface{}) interface{} {
 	return (*data)[key]
 }
 
-func (data *ConcreteMap) Set(key, value interface{}) {
+func (data *aMap) Set(key, value interface{}) {
 	(*data)[key] = value
 }
 
-func (data *ConcreteMap) Delete(key interface{}) {
+func (data *aMap) Delete(key interface{}) {
 	delete(*data, key)
 }

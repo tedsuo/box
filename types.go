@@ -1,4 +1,4 @@
-package f
+package box
 
 type Collection interface {
 	Sequence
@@ -13,5 +13,3 @@ type Sequence interface {
 	Keys() []interface{}
 	Get(key interface{}) interface{}
 }
-
-type IteratorFunc func(key, val interface{})
