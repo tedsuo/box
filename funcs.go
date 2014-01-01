@@ -2,25 +2,41 @@ package box
 
 import "reflect"
 
-func Each(seq Sequence, cb interface{}) {
-	cbFunc := reflect.ValueOf(cb)
-	for _, key := range seq.Keys() {
-		cbFunc.Call([]reflect.Value{
-			reflect.ValueOf(key),
-			reflect.ValueOf(seq.Get(key)),
-		})
+func Each(sequenceInput interface{}, callbackInput interface{}) {
+	seq := NewSeq(sequenceInput)
+	cb := reflect.ValueOf(callbackInput)
+	argLength := cb.Type().NumIn()
+	count := 0
+	args := []reflect.Value{}
+
+	for boxedVal := range seq {
+		if argLength == 0 {
+			cb.Call(args)
+			continue
+		}
+		count++
+		args = append(args, reflect.ValueOf(boxedVal))
+		if count == argLength {
+			cb.Call(args)
+			count = 0
+			args = []reflect.Value{}
+		}
 	}
 }
 
-func Merge(collection, otherCollection Collection) Collection {
-	mergedMap := NewMap()
+func Merge(args ...interface{}) (mergedMap Map) {
+	mergedMap = NewMap()
+	Each(args, func(seq interface{}) {
+		Each(seq, mergedMap.Set)
+	})
 
-	iterator := func(key, value interface{}) {
-		mergedMap.Set(key, value)
-	}
+	return
+}
 
-	Each(collection, iterator)
-	Each(otherCollection, iterator)
-
-	return mergedMap
+func Count(input interface{}) int {
+	i := 0
+	Each(input, func() {
+		i++
+	})
+	return i
 }

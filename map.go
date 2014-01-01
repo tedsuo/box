@@ -1,11 +1,14 @@
 package box
 
-import "reflect"
+import ()
 
 // INTERFACE
 
 type Map interface {
 	Collection
+	Get(key interface{}) interface{}
+	Set(key, value interface{})
+	Keys() []interface{}
 	IsNil(key interface{}) bool
 	NotNil(key interface{}) bool
 }
@@ -24,7 +27,8 @@ func NewMap(input ...interface{}) (mapp Map) {
 		newMap := aMap(data)
 		mapp = &newMap
 	default:
-		mapp = newMapFromValue(reflect.ValueOf(data))
+		mapp = newEmptyMap()
+		Each(data, mapp.Set)
 	}
 
 	return
@@ -34,30 +38,21 @@ func newEmptyMap() Map {
 	return &aMap{}
 }
 
-func newMapFromValue(inputVal reflect.Value) (mapp Map) {
-	switch inputVal.Kind() {
-	case reflect.Struct:
-		mapp = newMapFromStructValue(inputVal)
-	}
-	return
-}
-
-func newMapFromStructValue(inputVal reflect.Value) (mapp Map) {
-	mapp = newEmptyMap()
-	inputType := inputVal.Type()
-	FieldCount := inputVal.NumField()
-
-	for i := 0; i < FieldCount; i++ {
-		key := inputType.Field(i).Name
-		val := inputVal.Field(i).Interface()
-		mapp.Set(key, val)
-	}
-	return
-}
-
 // IMPLEMENTATION
 
 type aMap map[interface{}]interface{}
+
+func (data *aMap) Seq() (seq Sequence) {
+	seq = NewSeq()
+	go func() {
+		defer close(seq)
+		for key, val := range *data {
+			seq <- key
+			seq <- val
+		}
+	}()
+	return
+}
 
 func (data *aMap) IsEmpty() bool {
 	return data.Count() == 0
