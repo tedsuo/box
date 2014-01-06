@@ -7,6 +7,5 @@ type Sequencer interface {
 type Collection interface {
 	Sequencer
 	Has(item interface{}) bool
-	Delete(item interface{})
 	Count() int
 }

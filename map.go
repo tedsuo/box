@@ -1,13 +1,16 @@
 package box
 
-import ()
+import (
+	"fmt"
+)
 
 // INTERFACE
 
 type Map interface {
 	Collection
-	Get(key interface{}) interface{}
+	Get(key interface{}) Box
 	Set(key, value interface{})
+	Delete(item interface{})
 	Keys() []interface{}
 	IsNil(key interface{}) bool
 	NotNil(key interface{}) bool
@@ -34,13 +37,13 @@ func NewMap(input ...interface{}) (mapp Map) {
 	return
 }
 
-func newEmptyMap() Map {
-	return &aMap{}
-}
-
 // IMPLEMENTATION
 
 type aMap map[interface{}]interface{}
+
+func newEmptyMap() Map {
+	return &aMap{}
+}
 
 func (data *aMap) Seq() (seq Sequence) {
 	seq = NewSeq()
@@ -52,6 +55,10 @@ func (data *aMap) Seq() (seq Sequence) {
 		}
 	}()
 	return
+}
+
+func (data *aMap) String() string {
+	return fmt.Sprintf("%+v", *data)
 }
 
 func (data *aMap) IsEmpty() bool {
@@ -87,7 +94,7 @@ func (data *aMap) Keys() (keys []interface{}) {
 	return
 }
 
-func (data *aMap) Get(key interface{}) interface{} {
+func (data *aMap) Get(key interface{}) Box {
 	return (*data)[key]
 }
 

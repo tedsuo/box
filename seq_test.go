@@ -3,14 +3,14 @@ package box_test
 import (
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
-	ß "github.com/tedsuo/box"
+	ƒ "github.com/tedsuo/box"
 )
 
 var _ = Describe("Seq", func() {
 	Describe("New", func() {
 
 		It("NewSeq() creates an empty seq", func() {
-			seq := ß.NewSeq()
+			seq := ƒ.NewSeq()
 			i := 0
 
 			go func() {
@@ -33,10 +33,10 @@ var _ = Describe("Seq", func() {
 				"Married": "true",
 			}
 
-			Ω(ß.Count(input)).Should(Equal(6))
+			Ω(ƒ.Count(input)).Should(Equal(6))
 
 			i := 0
-			ß.Each(input, func(key, val string) {
+			ƒ.Each(input, func(key, val string) {
 				Ω(input[key]).Should(Equal(val))
 				i++
 			})
@@ -56,10 +56,10 @@ var _ = Describe("Seq", func() {
 				Married: true,
 			}
 
-			Ω(ß.Count(joeBob)).Should(Equal(6))
+			Ω(ƒ.Count(joeBob)).Should(Equal(6))
 
 			i := 0
-			ß.Each(joeBob, func(key string, val interface{}) {
+			ƒ.Each(joeBob, func(key string, val interface{}) {
 				switch key {
 				case "Name":
 					Ω(val.(string)).Should(Equal("Joe Bob"))
