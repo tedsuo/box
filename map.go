@@ -8,7 +8,7 @@ import (
 
 type Map interface {
 	Collection
-	Get(key interface{}) Box
+	Get(key interface{}) interface{}
 	Set(key, value interface{})
 	Delete(item interface{})
 	Keys() []interface{}
@@ -50,8 +50,7 @@ func (data *aMap) Seq() (seq Sequence) {
 	go func() {
 		defer close(seq)
 		for key, val := range *data {
-			seq <- key
-			seq <- val
+			seq <- Box{key,val}
 		}
 	}()
 	return
@@ -94,7 +93,7 @@ func (data *aMap) Keys() (keys []interface{}) {
 	return
 }
 
-func (data *aMap) Get(key interface{}) Box {
+func (data *aMap) Get(key interface{}) interface{} {
 	return (*data)[key]
 }
 

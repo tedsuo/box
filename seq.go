@@ -4,7 +4,7 @@ import (
 	"reflect"
 )
 
-type Box interface{}
+type Box []interface{}
 
 type Sequence chan Box
 
@@ -53,8 +53,7 @@ func newSeqFromValue(inputVal reflect.Value) (seq Sequence) {
 func seqNativeMapValue(seq Sequence, inputVal reflect.Value) {
 	for _, key := range inputVal.MapKeys() {
 		val := inputVal.MapIndex(key)
-		seq <- key.Interface()
-		seq <- val.Interface()
+		seq <- Box{key.Interface(),val.Interface()}
 	}
 	return
 }
@@ -63,7 +62,7 @@ func seqSliceValue(seq Sequence, inputVal reflect.Value) {
 	count := inputVal.Len()
 	for i := 0; i < count; i++ {
 		val := inputVal.Index(i)
-		seq <- val.Interface()
+		seq <- Box{val.Interface()}
 	}
 }
 
@@ -73,7 +72,6 @@ func seqStructValue(seq Sequence, inputVal reflect.Value) {
 	for i := 0; i < FieldCount; i++ {
 		key := inputType.Field(i).Name
 		val := inputVal.Field(i).Interface()
-		seq <- key
-		seq <- val
+		seq <- Box{key,val}
 	}
 }

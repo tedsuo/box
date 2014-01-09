@@ -24,7 +24,7 @@ func BenchmarkSetBoxedMapFromSeq(b *testing.B) {
 	go func() {
 		defer close(seq)
 		for i := 0; i < b.N; i++ {
-			seq <- i
+			seq <- ƒ.Box{i,i}
 		}
 	}()
 	mapp := ƒ.NewMap(seq)
@@ -66,7 +66,7 @@ func BenchmarkCountSeqViaEach(b *testing.B) {
 	go func() {
 		defer close(seq)
 		for i := 0; i < b.N; i++ {
-			seq <- i
+			seq <- ƒ.Box{i}
 		}
 	}()
 	ƒ.Count(seq)
@@ -77,7 +77,7 @@ func BenchmarkCountSeqViaRangeInc(b *testing.B) {
 	go func() {
 		defer close(seq)
 		for i := 0; i < b.N; i++ {
-			seq <- i
+			seq <- ƒ.Box{i}
 		}
 	}()
 	i := length(seq)

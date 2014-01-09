@@ -40,6 +40,15 @@ var _ = Describe("Funcs", func() {
 			Ω(count).Should(Equal(len(keys)))
 		})
 
+		It("iterates over only values", func() {
+			count := 0
+			ƒ.Each(coll, func(val string) {
+				Ω(val).Should(Equal(values[count]))
+				count++
+			})
+			Ω(count).Should(Equal(len(values)))
+		})
+
 	})
 
 	Describe("Concat: Map", func() {

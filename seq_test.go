@@ -15,11 +15,11 @@ var _ = Describe("Seq", func() {
 
 			go func() {
 				defer close(seq)
-				seq <- "foo"
+				seq <- ƒ.Box{"foo"}
 			}()
 
 			for val := range seq {
-				Ω(val.(string)).Should(Equal("foo"))
+				Ω(val[0].(string)).Should(Equal("foo"))
 				i++
 			}
 
@@ -33,7 +33,7 @@ var _ = Describe("Seq", func() {
 				"Married": "true",
 			}
 
-			Ω(ƒ.Count(input)).Should(Equal(6))
+			Ω(ƒ.Count(input)).Should(Equal(3))
 
 			i := 0
 			ƒ.Each(input, func(key, val string) {
@@ -56,7 +56,7 @@ var _ = Describe("Seq", func() {
 				Married: true,
 			}
 
-			Ω(ƒ.Count(joeBob)).Should(Equal(6))
+			Ω(ƒ.Count(joeBob)).Should(Equal(3))
 
 			i := 0
 			ƒ.Each(joeBob, func(key string, val interface{}) {

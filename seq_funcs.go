@@ -9,8 +9,8 @@ func Concat(args ...interface{}) (out Sequence) {
 	out = NewSeq()
 	go func() {
 		defer close(out)
-		for seq := range NewSeq(args) {
-			for ß := range NewSeq(seq) {
+		for _, arg := range args {
+			for ß := range NewSeq(arg) {
 				out <- ß
 			}
 		}
@@ -28,9 +28,9 @@ func Count(input interface{}) int {
 
 func Each(sequenceInput interface{}, callbacks ...interface{}) {
 	cbStack := newCallbackStack(callbacks)
-	for boxedVal := range NewSeq(sequenceInput) {
+	for ß := range NewSeq(sequenceInput) {
 		for _, cb := range cbStack {
-			cb.Call(boxedVal)
+			cb.Call(ß)
 		}
 	}
 }
@@ -65,7 +65,6 @@ func newCallbackStack(callbacks []interface{}) (stack callbackStack) {
 type callback struct {
 	funcVal   reflect.Value
 	argLength int
-	args      []reflect.Value
 }
 
 func newCallback(callbackInput interface{}) *callback {
@@ -73,7 +72,6 @@ func newCallback(callbackInput interface{}) *callback {
 	call := new(callback)
 	call.funcVal = cb
 	call.argLength = cb.Type().NumIn()
-	call.args = []reflect.Value{}
 	return call
 }
 
@@ -81,23 +79,24 @@ func (cb *callback) String() string {
 	return fmt.Sprintf("%+v", *cb)
 }
 
-func (cb *callback) Call(args ...interface{}) (results []interface{}) {
+var emptyArgs = []reflect.Value{}
+
+func (cb *callback) Call(ß Box) (results []interface{}) {
 	results = []interface{}{}
 	if cb.argLength == 0 {
-		cb.funcVal.Call(cb.args)
+		cb.funcVal.Call(emptyArgs)
 		return
 	}
 
-	for _, boxedVal := range args {
-		cb.args = append(cb.args, reflect.ValueOf(boxedVal))
+	var args = []reflect.Value{}
+	for i := len(ß)-cb.argLength; i < len(ß); i++ {
+		boxedVal := ß[i]
+		args = append(args, reflect.ValueOf(boxedVal))
 	}
 
-	if len(cb.args)%cb.argLength == 0 {
-		resultVals := cb.funcVal.Call(cb.args)
-		for _, resultVal := range resultVals {
-			results = append(results, resultVal.Interface())
-		}
-		cb.args = []reflect.Value{}
+	resultVals := cb.funcVal.Call(args)
+	for _, resultVal := range resultVals {
+		results = append(results, resultVal.Interface())
 	}
 	return
 }
