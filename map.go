@@ -37,20 +37,20 @@ func NewMap(input ...interface{}) (mapp Map) {
 	return
 }
 
-// IMPLEMENTATION
-
-type aMap map[interface{}]interface{}
-
 func newEmptyMap() Map {
 	return &aMap{}
 }
+
+// IMPLEMENTATION
+
+type aMap map[interface{}]interface{}
 
 func (data *aMap) Seq() (seq Sequence) {
 	seq = NewSeq()
 	go func() {
 		defer close(seq)
 		for key, val := range *data {
-			seq <- Box{key,val}
+			seq <- Box{key, val}
 		}
 	}()
 	return
