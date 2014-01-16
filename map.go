@@ -19,19 +19,24 @@ type Map interface {
 // INITIALIZATION
 
 func NewMap(input ...interface{}) (mapp Map) {
-	if len(input) == 0 {
+	switch len(input) {
+	case 0:
 		return newEmptyMap()
-	}
 
-	switch data := input[0].(type) {
-	case Map:
-		mapp = data
-	case map[interface{}]interface{}:
-		newMap := aMap(data)
-		mapp = &newMap
+	case 1:
+		switch data := input[0].(type) {
+		case Map:
+			mapp = data
+		case map[interface{}]interface{}:
+			newMap := aMap(data)
+			mapp = &newMap
+		default:
+			mapp = newEmptyMap()
+			Each(data, mapp.Set)
+		}
+
 	default:
-		mapp = newEmptyMap()
-		Each(data, mapp.Set)
+		panic("NewMap called with more than 1 argument")
 	}
 
 	return

@@ -24,7 +24,7 @@ func BenchmarkSetBoxedMapFromSeq(b *testing.B) {
 	go func() {
 		defer close(seq)
 		for i := 0; i < b.N; i++ {
-			seq <- ƒ.Box{i,i}
+			seq <- ƒ.Box{i, i}
 		}
 	}()
 	mapp := ƒ.NewMap(seq)
